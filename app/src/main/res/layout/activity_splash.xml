@@ -7,5 +7,4 @@
     android:background="@mipmap/ic_launcher"
     tools:context="proj.abigo.coco.cocoapplication.SplashActivity">
 
-
-</>
+</RelativeLayout>
