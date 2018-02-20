@@ -62,7 +62,7 @@ public class MainActivity extends AppCompatActivity {
                 // tab 두 번 눌렀을 시 상단으로 자동 스크롤
                 switch (tab.getPosition()){
                     case 0:
-//                        MyFeedFragment.moveScroll();
+                        MyFeedFragment.moveScroll();
                         break;
                     case 1:
                         break;
