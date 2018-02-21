@@ -12,6 +12,8 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import proj.abigo.coco.cocoapplication.R;
+
 /**
  * Created by User on 2018-02-20.
  */
