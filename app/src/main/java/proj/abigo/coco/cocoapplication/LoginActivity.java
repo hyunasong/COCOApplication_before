@@ -1,41 +1,27 @@
 package proj.abigo.coco.cocoapplication;
 
-import android.app.AlertDialog;
-import android.content.DialogInterface;
+import android.app.Activity;
 import android.content.Intent;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageInstaller;
-import android.content.pm.PackageManager;
-import android.content.pm.Signature;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Base64;
 import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.InputMethod;
+import android.widget.Button;
 
-import com.kakao.auth.ApiResponseCallback;
-import com.kakao.auth.AuthService;
 import com.kakao.auth.ErrorCode;
 import com.kakao.auth.ISessionCallback;
 import com.kakao.auth.Session;
-import com.kakao.auth.network.response.AccessTokenInfoResponse;
 import com.kakao.network.ErrorResult;
 import com.kakao.usermgmt.LoginButton;
 import com.kakao.usermgmt.UserManagement;
-import com.kakao.usermgmt.callback.LogoutResponseCallback;
 import com.kakao.usermgmt.callback.MeResponseCallback;
-import com.kakao.usermgmt.callback.UnLinkResponseCallback;
 import com.kakao.usermgmt.response.model.UserProfile;
 import com.kakao.util.exception.KakaoException;
 import com.kakao.util.helper.log.Logger;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import proj.abigo.coco.cocoapplication.Bluetooth.BluetoothService;
 
 
 public class LoginActivity extends AppCompatActivity {
@@ -49,14 +35,36 @@ public class LoginActivity extends AppCompatActivity {
     SessionCallback callback;
 
     LoginButton com_kakao_login;
+    Button btnBtConnect;
+
+    private static final String TAG = "Login";
+
     public static final String NICKNAME = "nick";
     public static final String USER_ID = "id";
     public static final String PROFILE_IMG ="img";
+
+    private static final int REQUEST_CONNECT_DEVICE = 1;
+    private static final int REQUEST_ENABLE_BT = 2;
+
+    BluetoothService btService = null;
+
+    private final Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+
+        initView();
+
+        if(btService == null){
+            btService = new BluetoothService(this, handler);
+        }
         //getHashKey();
 /*
         UserManagement.requestLogout(new LogoutResponseCallback() {
@@ -79,6 +87,31 @@ public class LoginActivity extends AppCompatActivity {
         callback = new SessionCallback();
         Session.getCurrentSession().addCallback(callback);
 
+        setEvent();
+    }
+
+
+
+    private void setEvent() {
+
+        btnBtConnect.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if(btService.getDeviceState()){
+                    // 블루투스 지원 가능 기기
+                    btService.enableBluetooth();
+                }else{
+                    finish();
+                }
+            }
+        });
+    }
+
+
+    private void initView() {
+
+        btnBtConnect = (Button)findViewById(R.id.btnBtConnect);
+
     }
 
     //재로그인요청
@@ -87,6 +120,7 @@ public class LoginActivity extends AppCompatActivity {
         startActivity(intent);
         finish();
     }
+
     //간편로그인 시 호출되는 부분
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -94,6 +128,25 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
         super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode){
+            case REQUEST_ENABLE_BT :
+                if(resultCode == Activity.RESULT_OK){
+                    // 기기 접속 요청
+                    btService.scanDevice();
+                }
+                else{
+                    Log.d(TAG, "Bluetooth is not enabled");
+                }
+                break;
+
+            case REQUEST_CONNECT_DEVICE :
+                if(resultCode == Activity.RESULT_OK){
+                    // 검색된 기기에 접속
+                    btService.getDeviceInfo(data);
+                }
+                break;
+        }
     }
 
     @Override

@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="proj.abigo.coco.cocoapplication">
-    <uses-permission android:name="android.permission.INTERNET"/>
+
+    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
+
+    /* 블루투스 권한*/
+    <uses-permission android:name="android.permission.BLUETOOTH"></uses-permission>
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"></uses-permission>
+
     <application
         android:name =".GlobalApplication"
         android:allowBackup="true"
@@ -19,10 +25,15 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".MainActivity" />
-        <activity android:name=".LoginActivity">
+        <activity android:name=".MainActivity" > </activity>
+        <activity android:name=".LoginActivity"> </activity>
+
+        <activity
+            android:name=".Bluetooth.DeviceListActivity"
+            android:theme="@android:style/Theme.DeviceDefault.Dialog">
 
         </activity>
+
     </application>
 
 </manifest>
