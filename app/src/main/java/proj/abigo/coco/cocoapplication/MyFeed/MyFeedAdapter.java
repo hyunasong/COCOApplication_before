@@ -12,6 +12,8 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import proj.abigo.coco.cocoapplication.R;
+
 /**
  * Created by User on 2018-02-20.
  */
@@ -44,7 +46,7 @@ public class MyFeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
 
         /* todo / feed 데이터 받아와서 보여주는 작업업 */
        viewHolder.txt_user_name.setText("user_name");
-        viewHolder.txt_savings.setText("savings");
+       viewHolder.txt_savings.setText("savings");
     }
 
     @Override
