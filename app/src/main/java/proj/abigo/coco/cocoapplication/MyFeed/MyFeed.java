@@ -9,8 +9,16 @@ public class MyFeed {
     String user_id;
     String user_img_path;
     String user_name;
-    int savings;
+    String savings;
     String save_date;
+
+    public MyFeed(String user_id, String user_img_path, String user_name, String savings, String save_date) {
+        this.user_id = user_id;
+        this.user_img_path = user_img_path;
+        this.user_name = user_name;
+        this.savings = savings;
+        this.save_date = save_date;
+    }
 
     public String getUser_id() {
         return user_id;
@@ -36,11 +44,11 @@ public class MyFeed {
         this.user_name = user_name;
     }
 
-    public int getSavings() {
+    public String getSavings() {
         return savings;
     }
 
-    public void setSavings(int savings) {
+    public void setSavings(String savings) {
         this.savings = savings;
     }
 

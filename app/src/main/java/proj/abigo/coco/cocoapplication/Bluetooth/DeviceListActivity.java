@@ -1,4 +1,4 @@
-﻿package proj.abigo.coco.cocoapplication.Bluetooth;
+package proj.abigo.coco.cocoapplication.Bluetooth;
 
 import java.util.Set;
 

@@ -1,6 +1,8 @@
 package proj.abigo.coco.cocoapplication.MyFeed;
 
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
@@ -11,9 +13,11 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
+import proj.abigo.coco.cocoapplication.Bluetooth.BluetoothService;
 import proj.abigo.coco.cocoapplication.R;
 
 /**
@@ -21,6 +25,8 @@ import proj.abigo.coco.cocoapplication.R;
  */
 
 public class MyFeedFragment extends Fragment implements View.OnTouchListener{
+
+    public static final int MESSAGE_STATE_CHANGE = 3; // 블루투스 연결 상태 check
 
     private static SwipeRefreshLayout myFeed_swipe_Refresh;
     private static RecyclerView myFeed_list_recycler;
@@ -30,9 +36,15 @@ public class MyFeedFragment extends Fragment implements View.OnTouchListener{
 
     ArrayList<MyFeed> myFeedsList = null;
 
+    BluetoothService btService = null;
+
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        if(btService == null){
+            btService = new BluetoothService(getActivity(), handler);
+        }
     }
 
     @Nullable
@@ -60,6 +72,19 @@ public class MyFeedFragment extends Fragment implements View.OnTouchListener{
         myFeed_list_recycler.setLayoutManager(mLinearLayoutManager);
         
     }
+
+    private final Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+
+               String readMessage = (String) msg.obj;
+
+               MyFeed feeditem = new MyFeed("1", "d", "g", readMessage, "2018");
+               myFeedsList.add(feeditem);
+
+        }
+    };
 
     @Override
     public boolean onTouch(View v, MotionEvent event) {

@@ -15,6 +15,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.UUID;
 
+import proj.abigo.coco.cocoapplication.LoginActivity;
+import proj.abigo.coco.cocoapplication.MyFeed.MyFeedFragment;
+
 
 /**
  * Created by DS on 2018-03-23.
@@ -27,6 +30,13 @@ public class BluetoothService {
     // 블루투스 통신 프로토콜
     private static final UUID MY_UUID = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
 
+    // 상태를 나타내는 상태 변수
+    public static final int STATE_NONE = 0; // 아무런 일 X
+    public static final int STATE_LISTEN = 1; // 연결을 위한 리스닝 상태
+    public static final int STATE_CONNECTING = 2; // 연결 과정 시작
+    public static final int STATE_CONNECTED = 3; // 연결된 상태
+    public static final int STATE_FAIL = 4; // 연결 실패
+
     private static final int REQUEST_CONNECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;
 
@@ -38,6 +48,9 @@ public class BluetoothService {
     private Activity mActivity;
     private Handler mHandler;
 
+    private int mState;
+
+    /* BluetoothService 생성자*/
     public BluetoothService(Activity activity, Handler handler) {
         mActivity = activity;
         mHandler = handler;
@@ -46,6 +59,7 @@ public class BluetoothService {
         btAdapter = BluetoothAdapter.getDefaultAdapter();
     }
 
+    /* 블루투스 지원 기기 확인*/
     public boolean getDeviceState(){
         Log.i(TAG, "Bluetooth check");
 
@@ -59,6 +73,7 @@ public class BluetoothService {
         }
     }
 
+    /* 블루투스 상태 체크 */
     public void enableBluetooth(){
         Log.i(TAG, "Check the enable Bluetooth");
 
@@ -94,6 +109,124 @@ public class BluetoothService {
         connect(device);
     }
 
+    /* 블루투스 상태 set */
+    private synchronized void setState(int state){
+        Log.d(TAG, "setState() " + mState + "-> "+ state);
+        mState = state;
+
+        // 블루투스 상태를 handler 를 통해 넘겨줌
+        mHandler.obtainMessage(LoginActivity.MESSAGE_STATE_CHANGE, state, -1).sendToTarget();
+    }
+
+    /* 블루투스 상태 get */
+    public synchronized int getState(){
+        return mState;
+    }
+
+    public synchronized void start(){
+        Log.d(TAG, "start");
+
+        if(mConnectThread == null){}
+        else{
+            mConnectThread.cancel();
+            mConnectThread = null;
+        }
+
+        if(mConnectedThread == null){
+            mConnectedThread.cancel();
+            mConnectedThread = null;
+        }
+    }
+
+    /* ConnectThread 초기화 _ device의 모든 연결 제거*/
+    public synchronized  void connect(BluetoothDevice device){
+
+        Log.d(TAG, "connnect to : " + device);
+
+        if(mState == STATE_CONNECTING){
+            if(mConnectThread == null){}
+            else{
+                mConnectThread.cancel();
+                mConnectThread = null;
+            }
+        }
+
+        if(mConnectedThread == null){}
+        else{
+            mConnectedThread.cancel();
+            mConnectedThread = null;
+        }
+
+        mConnectThread = new ConnectThread(device);
+
+        mConnectThread.start();
+        setState(STATE_CONNECTING);
+    }
+
+    /* ConnectedThread 초기화 */
+    public synchronized void connected(BluetoothSocket socket, BluetoothDevice device){
+
+        Log.d(TAG, "connected");
+
+        if(mConnectThread == null){}
+        else{
+            mConnectThread.cancel();
+            mConnectThread = null;
+        }
+
+        if(mConnectedThread == null){}
+        else{
+            mConnectedThread.cancel();
+            mConnectedThread = null;
+        }
+
+        mConnectedThread = new ConnectedThread(socket);
+
+        mConnectedThread.start();
+        setState(STATE_CONNECTED);
+
+    }
+
+    /* 모든 thread stop*/
+    public synchronized void stop(){
+
+        Log.d(TAG, "stop");
+
+        if(mConnectThread != null){
+            mConnectThread.cancel();
+            mConnectThread = null;
+        }
+
+        if(mConnectedThread != null){
+            mConnectedThread.cancel();
+            mConnectedThread = null;
+        }
+
+        setState(STATE_NONE);
+    }
+
+    /* 값을 보냄*/
+    public void write(byte[] out){
+        ConnectedThread r;
+        synchronized (this){
+            if(mState != STATE_CONNECTED)
+                return;
+            r = mConnectedThread;
+        }
+    }
+
+    /* 연결에 실패했을 때*/
+    private void connectionFailed(){
+        setState(STATE_FAIL);
+    }
+
+    /* 연결을 잃었을 때 */
+    private void connectionLost(){
+        setState(STATE_LISTEN);
+    }
+
+
+    /* socket, thread 생성 */
     private class ConnectThread extends Thread {
 
         private final BluetoothSocket mmSocket;
@@ -198,6 +331,8 @@ public class BluetoothService {
                 try {
                     // InputStream으로부터 값을 받는 읽는 부분(값을 받는다)
                     bytes = mmInStream.read(buffer);
+                    final String readingMessage = new String(buffer, "UTF-8");
+                    mHandler.obtainMessage(MyFeedFragment.MESSAGE_STATE_CHANGE, bytes, -1, readingMessage).sendToTarget();
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
                     connectionLost();

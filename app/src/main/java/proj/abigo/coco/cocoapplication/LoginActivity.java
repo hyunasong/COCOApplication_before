@@ -9,6 +9,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.Toast;
 
 import com.kakao.auth.ErrorCode;
 import com.kakao.auth.ISessionCallback;
@@ -43,17 +44,13 @@ public class LoginActivity extends AppCompatActivity {
     public static final String USER_ID = "id";
     public static final String PROFILE_IMG ="img";
 
+    private static final boolean D = true;
+
     private static final int REQUEST_CONNECT_DEVICE = 1;
     private static final int REQUEST_ENABLE_BT = 2;
+    public static final int MESSAGE_STATE_CHANGE = 3; // 블루투스 연결 상태 check
 
     BluetoothService btService = null;
-
-    private final Handler handler = new Handler(){
-        @Override
-        public void handleMessage(Message msg) {
-            super.handleMessage(msg);
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,7 +87,27 @@ public class LoginActivity extends AppCompatActivity {
         setEvent();
     }
 
+    private final Handler handler = new Handler(){
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
 
+            switch (msg.what){
+                case MESSAGE_STATE_CHANGE :
+                    if(D) Log.d(TAG, "MESSAGE_STATE_CHANGE" + msg.arg1);
+
+                    switch (msg.arg1){
+                        case BluetoothService.STATE_CONNECTED :
+                            Toast.makeText(getApplicationContext(), "블루투스 연결에 성공하였습니다.", Toast.LENGTH_SHORT).show();
+                            break;
+                        case BluetoothService.STATE_FAIL:
+                            Toast.makeText(getApplicationContext(), "블루투스 연결에 실패하였습니다.", Toast.LENGTH_SHORT).show();
+                            break;
+                    }
+                    break;
+            }
+        }
+    };
 
     private void setEvent() {
 
