@@ -323,16 +323,20 @@ public class BluetoothService {
         public void run() {
             Log.i(TAG, "BEGIN mConnectedThread");
 
-            byte[] buffer = new byte[1024];
+            byte[] readBuffer = new byte[1024];
             int bytes;
 
             // Keep listening to the InputStream while connected
             while (true) {
                 try {
-                    // InputStream으로부터 값을 받는 읽는 부분(값을 받는다)
-                    bytes = mmInStream.read(buffer);
-                    final String readingMessage = new String(buffer, "UTF-8");
-                    mHandler.obtainMessage(MyFeedFragment.MESSAGE_STATE_CHANGE, bytes, -1, readingMessage).sendToTarget();
+                    int bytesAvailable = mmInStream.available(); // 수신 데이터 확인
+                    if(bytesAvailable > 0){
+                        // InputStream으로부터 값을 받는 읽는 부분(값을 받는다)
+                        bytes = mmInStream.read(readBuffer);
+                        final String readingMessage = new String(readBuffer, "US-ASCII");
+
+                        mHandler.obtainMessage(MyFeedFragment.MESSAGE_READING, bytes, -1, readingMessage).sendToTarget();
+                    }
                 } catch (IOException e) {
                     Log.e(TAG, "disconnected", e);
                     connectionLost();
@@ -353,7 +357,10 @@ public class BluetoothService {
 
         public void cancel() {
             try {
+                mConnectedThread.interrupt();
                 mmSocket.close();
+                mmInStream.close();
+                mmOutStream.close();
             } catch (IOException e) {
                 Log.e(TAG, "close() of connect socket failed", e);
             }

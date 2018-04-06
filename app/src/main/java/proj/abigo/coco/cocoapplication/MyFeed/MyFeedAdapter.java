@@ -46,7 +46,6 @@ public class MyFeedAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder>
         final MyFeed feed = myFeeds_list.get(position-1);
         MyFeedItemViewHolder viewHolder = (MyFeedItemViewHolder) holder;
 
-
         /* todo / feed 데이터 받아와서 보여주는 작업업 */
        viewHolder.txt_user_name.setText(feed.getUser_name());
        viewHolder.txt_savings.setText(feed.getSavings());

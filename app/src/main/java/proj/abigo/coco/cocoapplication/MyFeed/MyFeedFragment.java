@@ -13,6 +13,7 @@ import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.ArrayList;
@@ -26,7 +27,7 @@ import proj.abigo.coco.cocoapplication.R;
 
 public class MyFeedFragment extends Fragment implements View.OnTouchListener{
 
-    public static final int MESSAGE_STATE_CHANGE = 3; // 블루투스 연결 상태 check
+    public static final int MESSAGE_READING = 1; // 블루투스 연결 상태 check
 
     private static SwipeRefreshLayout myFeed_swipe_Refresh;
     private static RecyclerView myFeed_list_recycler;
@@ -78,11 +79,16 @@ public class MyFeedFragment extends Fragment implements View.OnTouchListener{
         public void handleMessage(Message msg) {
             super.handleMessage(msg);
 
-               String readMessage = (String) msg.obj;
+            switch (msg.what) {
+                case MESSAGE_READING :
+                    String readMessage = (String) msg.obj;
+                    Log.d("readMessage", readMessage);
 
-               MyFeed feeditem = new MyFeed("1", "d", "g", readMessage, "2018");
-               myFeedsList.add(feeditem);
+                    // list item 추가
+                    MyFeed feeditem = new MyFeed("1", "d", "g", readMessage, "2018");
+                    myFeedsList.add(feeditem);
 
+            }
         }
     };
 

@@ -99,6 +99,8 @@ public class LoginActivity extends AppCompatActivity {
                     switch (msg.arg1){
                         case BluetoothService.STATE_CONNECTED :
                             Toast.makeText(getApplicationContext(), "블루투스 연결에 성공하였습니다.", Toast.LENGTH_SHORT).show();
+                            Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                            startActivity(intent);
                             break;
                         case BluetoothService.STATE_FAIL:
                             Toast.makeText(getApplicationContext(), "블루투스 연결에 실패하였습니다.", Toast.LENGTH_SHORT).show();
